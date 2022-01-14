@@ -157,24 +157,24 @@ function profile.Cast()
 		end
 		--proc spells 
 		if not HasBuff(Player.id,1249) then
-			if Player.gauge ~= nil and ((Player.gauge[2] > Player.gauge[1]) or (Player.gauge[2] == Player.gauge[1]))  and profile.checkEach({"verstone"},true) then
+			if Player.gauge ~= nil and ((Player.gauge[2] > Player.gauge[1]) or (Player.gauge[2] == Player.gauge[1])) and (not Player:IsMoving()) and profile.checkEach({"verstone"},true) then
 				return true
 			end
-			if Player.gauge ~= nil and ((Player.gauge[1] > Player.gauge[2]) or (Player.gauge[2] == Player.gauge[1])) and profile.checkEach({"verfire"},true) then
+			if Player.gauge ~= nil and ((Player.gauge[1] > Player.gauge[2]) or (Player.gauge[2] == Player.gauge[1])) and (not Player:IsMoving()) and profile.checkEach({"verfire"},true) then
 				return true
 			end	
 		end
 	
 	--aoe target
 	
-		if (profile.counttarget() > 2) then
+		if (profile.counttarget() > 2)  then
 			if HasBuff(Player.id,1249) and profile.checkEach({"scatter","impact"},true) then
 				return true
 			end
-			if Player.gauge ~= nil and (Player.gauge[2] > Player.gauge[1]) and profile.checkEach({"veraero2"},true) then
+			if Player.gauge ~= nil and (Player.gauge[2] > Player.gauge[1]) and (not Player:IsMoving()) and profile.checkEach({"veraero2"},true) then
 				return true
 			end
-			if Player.gauge ~= nil and ((Player.gauge[1] > Player.gauge[2]) or (Player.gauge[1] == Player.gauge[2]))  and profile.checkEach({"verthunder2"},true) then
+			if Player.gauge ~= nil and ((Player.gauge[1] > Player.gauge[2]) or (Player.gauge[1] == Player.gauge[2])) and (not Player:IsMoving())  and profile.checkEach({"verthunder2"},true) then
 				return true
 			end
 			
@@ -191,7 +191,7 @@ function profile.Cast()
 				return true
 			end
 		end
-		if not (profile.counttarget() > 2) and profile.checkEach({"jolt","jolt2"},true) then	
+		if not (profile.counttarget() > 2) and (not Player:IsMoving()) and profile.checkEach({"jolt","jolt2"},true) then	
 			return true
 		end
 	
