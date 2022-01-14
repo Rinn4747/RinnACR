@@ -3,7 +3,7 @@ local profile = {}
 profile.GUI = {
     open = false,
     visible = true,
-    name = "PVE WAR 80",
+    name = "PVE WAR 80 1.1",
 }
  
 profile.classes = {
@@ -21,6 +21,18 @@ varwarrior =
 		overpower = {41,true},
 		mythriltempest = {16462,false},
 		steelcyclone = {51,false},
+		tomahawk = {46,true},
+		fellcleave = {3549,true},
+		decimate = {3550,false},
+		innerchaos= {16465,true},
+		innercyclone= {16463,false},
+		infuriate= {52,false},
+		innerrelease = {7389,false},
+		upheaval = {7387,true},
+		orogeny = {25751,false},
+		--bloodwhetting = {25752,true},
+		primalrend = {25753,true},
+		berserk = {38,false},
 		
 
 	}
@@ -74,17 +86,45 @@ function profile.Cast()
     local currentTarget = MGetTarget()
 	if (currentTarget) then
 		profile.setVar()
-		
+		--tomahawk if distance2d > 10
+		--math.distance2d(Player.pos.x,Player.pos.y,currentTarget.pos.x,currentTarget.pos.y) > 6
+		--and (not currentTarget.aggro)
+		if (currentTarget.distance > 10) and profile.checkEach({"tomahawk"},true) then
+			return true
+		end		
+		--buff  1177
+		if  (HasBuff(Player.id,2677) or (Player.level < 50)) and profile.checkEach({"berserk","innerrelease"},true) then
+			return true
+		end		
+		--ogcd buffid = 1897
+		if (not HasBuff(Player.id,1177)) and (not HasBuff(Player.id,1897)) and HasBuff(Player.id,2677) and profile.checkEach({"infuriate"},true) then
+			return true
+		end
+		--ogcd attacks
 		if profile.counttarget() > 1 then
-			if Player.gauge ~= nil and Player.gauge[1] >= 50 and profile.checkEach({"steelcyclone"},true)  then
+			if profile.checkEach({"orogeny"},false) then
+				return true
+			end			
+		else
+			if profile.checkEach({"upheaval"},true) then
+				return true
+			end
+		end
+		if profile.checkEach({"primalrend"},true) then
+			return true
+		end			
+		--gauge -50
+		if profile.counttarget() > 1 then
+			if Player.gauge ~= nil and ((Player.gauge[1] >= 50) or (HasBuff(Player.id,1177))) and profile.checkEach({"steelcyclone","decimate","innercyclone"},true)  then
 				return true
 			end		
 		else
-			if Player.gauge ~= nil and Player.gauge[1] >= 50 and profile.checkEach({"innerbeast"},true)  then
+			if Player.gauge ~= nil and ((Player.gauge[1] >= 50) or (HasBuff(Player.id,1177)))  and profile.checkEach({"innerbeast","fellcleave","innerchaos"},true)  then
 				return true
 			end
 		end
 		
+		--123 124 singe / aoe 12
 		if profile.counttarget() > 1 then
 			if Player.lastcomboid == 41 and profile.checkEach({"mythriltempest"},false) then
 				return true
