@@ -8,6 +8,7 @@ profile.GUI = {
  
 profile.classes = {
     [FFXIV.JOBS.SUMMONER] = true,
+	[FFXIV.JOBS.ARCANIST] = true,
 } 
 
 varsummoner = 
