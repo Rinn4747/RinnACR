@@ -3,7 +3,7 @@ local profile = {}
 profile.GUI = {
     open = false,
     visible = true,
-    name = "PVE SMN 1.3",
+    name = "PVE SMN 1.4",
 }
  
 profile.classes = {
@@ -12,6 +12,8 @@ profile.classes = {
 
 varsummoner = 
 	{ 
+		ruin = {163,true},
+		ruin2 = {172,true},
 		ruin3 = {3579,true},
 		summonbahamut = {7427,true},
 		erkindlebahamut = {7429,true},
@@ -19,19 +21,16 @@ varsummoner =
 		fountainoffire = {16514,true},
 		erkindlephoenix = {16516,true},
 		carbuncle = {25798,false},
-		--unconfirmed :
 		searinglight = {25801,false},
 		radiantaegis = {25799,false},
-		--
 		summonifrit = {25805,true},
 		summontitan = {25806,true},
 		summongaruda = {25807,true},
 		rubyrite= {25823,true},
 		topazrite= {25824,true},
 		emeraldrite= {25825,true},
-		--ogcd ?
-		rekindle= {25830,false}, --?
-		deathflare= {3582,true}, --3582
+		rekindle= {25830,false}, 
+		deathflare= {3582,true}, 
 		ruin4= {7426,true},
 		energydrain= {16508,true},
 		fester= {181,true},
@@ -42,7 +41,24 @@ varsummoner =
 		emeraldcastastrophe= {25834,true},
 		brandofpurgatory= {16515,true},
 		painflare= {3578,true},
-		
+		aethercharge= {25800,false},
+		outburst= {25800,true},
+		summontopaz= {25803,true},
+		summonruby= {25802,true},
+		summonemerald= {25804,true},
+		topazruin= {25809,true},
+		topazoutburst= {25815,true},
+		rubyruin= {25808,true},
+		rubyoutburst= {25814,true},
+		emeraldruin= {25810,true},
+		emeraldoutburst= {25816,true},
+		dreadwyrmstance = {3581,false},
+		topazruin3 = {25818,true},
+		rubyruin3 = {25817,true},
+		emeraldruin3 = {25819,true},
+		topazruin2 = {25812,true},
+		emeraldruin2 = {25813,true},
+		rubyruin2 = {25811,true},
 	}
 
 profile.ogcdtimer = 0
@@ -88,7 +104,7 @@ function profile.Cast()
 	
 	if (currentTarget) then
 		profile.setVar()
-		if (Player.gauge ~= nil) and (Player.gauge[1] == 0) and (Player.pet == nil) and profile.checkEach({"carbuncle"},false) then
+		if (Player.gauge ~= nil) and (Player.gauge[1] == 0) and (Player.gauge[2] == 0) and (Player.pet == nil) and profile.checkEach({"carbuncle"},false) then
 			return true
 		end	
 		
@@ -115,12 +131,12 @@ function profile.Cast()
 		end
 
 		--big summon
-		if Player.pet ~= nil and profile.checkEach({"summonbahamut"},true)  then
+		if Player.pet ~= nil and (profile.checkEach({"aethercharge","dreadwyrmstance"},false) or profile.checkEach({"summonbahamut"},true)) then
 			return true
 		end
 		
 		--bahamut spells
-		if (Player.pet ~= nil) and (Player.pet.name == "Demi-Bahamut") then
+		if ((Player.pet ~= nil) and (Player.pet.name == "Demi-Bahamut")) or (Player.gauge ~= nil and (Player.gauge[1] > 0)) then
 			if profile.checkEach({"erkindlebahamut"},true) then
 				return true
 			end
@@ -157,53 +173,53 @@ function profile.Cast()
 			end
 		end
 		--ifrit
-		if Player.gauge ~= nil and (Player.gauge[5] == 1) and (Player.gauge[2] == 0) and  profile.checkEach({"summonifrit"},true) then
+		if Player.gauge ~= nil and (Player.gauge[5] == 1) and (Player.gauge[2] == 0) and  profile.checkEach({"summonruby","summonifrit"},true) then
 			return true
 		end
 		if profile.counttarget(currentTarget.id) > 2 then
-			if (not Player:IsMoving()) and profile.checkEach({"rubycastastrophe"},true) then
+			if (not Player:IsMoving()) and profile.checkEach({"rubyoutburst","rubycastastrophe"},true) then
 				return true
 			end			
 		else
-			if (not Player:IsMoving()) and profile.checkEach({"rubyrite"},true) then
+			if (not Player:IsMoving()) and profile.checkEach({"rubyruin","rubyruin2","rubyruin3","rubyrite"},true) then
 				return true
 			end
 		end
 		--titan
-		if Player.gauge ~= nil and (Player.gauge[6] == 1) and (Player.gauge[2] == 0) and  profile.checkEach({"summontitan"},true) then
+		if Player.gauge ~= nil and (Player.gauge[6] == 1) and (Player.gauge[2] == 0) and  profile.checkEach({"summontopaz","summontitan"},true) then
 			return true
 		end
 		if profile.counttarget(currentTarget.id) > 2 then
-			if profile.checkEach({"topazcastastrophe"},true) then
+			if profile.checkEach({"topazoutburst","topazcastastrophe"},true) then
 				return true
 			end		
 		else
-			if profile.checkEach({"topazrite"},true) then
+			if profile.checkEach({"topazruin","topazruin2","topazruin3","topazrite"},true) then
 				return true
 			end
 		end
 		--garuda
-		if Player.gauge ~= nil and (Player.gauge[7] == 1) and (Player.gauge[2] == 0) and  profile.checkEach({"summongaruda"},true) then
+		if Player.gauge ~= nil and (Player.gauge[7] == 1) and (Player.gauge[2] == 0) and  profile.checkEach({"summonemerald","summongaruda"},true) then
 			return true
 		end
 		if profile.counttarget(currentTarget.id) > 2 then
-			if profile.checkEach({"emeraldcastastrophe"},true) then
+			if profile.checkEach({"emeraldoutburst","emeraldcastastrophe"},true) then
 				return true
 			end		
 		else
-			if profile.checkEach({"emeraldrite"},true) then
+			if profile.checkEach({"emeraldruin","emeraldruin2","emeraldruin3","emeraldrite"},true) then
 				return true
 			end
 		end
 		
 		if profile.counttarget(currentTarget.id) > 2 then	
-			if (Player.gauge ~= nil) and (Player.gauge[2] == 0) and profile.checkEach({"tridisaster"},true) then
+			if (Player.gauge ~= nil) and (Player.gauge[2] == 0) and profile.checkEach({"outburst","tridisaster"},true) then
 				return true
 			end
 		end
 		--single target
 		if profile.counttarget(currentTarget.id) <= 2 then
-			if (Player.gauge ~= nil) and (Player.gauge[2] == 0) and profile.checkEach({"ruin3"},true) then
+			if (Player.gauge ~= nil) and (Player.gauge[2] == 0) and profile.checkEach({"ruin","ruin2","ruin3"},true) then
 				return true
 			end
 		end
