@@ -3,7 +3,7 @@ local profile = {}
 profile.GUI = {
     open = false,
     visible = true,
-    name = "PVE RDM 80",
+    name = "PVE RDM 80 1.1",
 }
  
 profile.classes = {

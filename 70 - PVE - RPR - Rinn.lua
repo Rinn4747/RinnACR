@@ -3,7 +3,7 @@ local profile = {}
 profile.GUI = {
     open = false,
     visible = true,
-    name = "PVE RPR 70 Orig",
+    name = "PVE RPR 70 Orig 1.2",
 }
  
 profile.classes = {

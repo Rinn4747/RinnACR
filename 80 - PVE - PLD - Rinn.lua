@@ -3,11 +3,12 @@ local profile = {}
 profile.GUI = {
     open = false,
     visible = true,
-    name = "PVE PLD 80",
+    name = "PVE PLD 80 1.2",
 }
  
 profile.classes = {
     [FFXIV.JOBS.PALADIN] = true,
+	[FFXIV.JOBS.GLADIATOR] = true,
 } 
 
 --2587
@@ -30,6 +31,8 @@ varpaladin =
 		confiteor = {16459,true},
 		fightorflight = {20,false},
 		spiritswithin = {29,true},
+		shieldlob = {24,true},
+		circleofscorn = {23,false},
 		--shield bash 16
 		--shield lob 24
 		--total eclipse 7381
@@ -43,7 +46,6 @@ varpaladin =
 stunlist = {}
 stuntimer = 0
 profile.ogcdtimer = 0
-profile.usedgibbet = false
 
 function profile.counttarget()
 	local counter = 0
@@ -99,11 +101,15 @@ function profile.Cast()
 		if not HasBuff(Player.id,79) and profile.checkEach({"ironwill"},false) then
 			return true
 		end
+		--range 18y
+		if (currentTarget.distance > 10) and profile.checkEach({"shieldlob"},true) then
+			return true
+		end		
 		
 		--buffs defensive
 		
 		--buffs offensive
-		if profile.checkEach({"fightorflight"},false) then
+		if (currentTarget.distance < 5) and profile.checkEach({"fightorflight"},false) then
 			return true
 		end
 		
@@ -113,9 +119,14 @@ function profile.Cast()
 		end
 		
 		--ogcd offensive
-		if profile.checkEach({"spiritswithin"},true) then
+		if (TimeSince(profile.ogcdtimer) > 3000) and  profile.checkEach({"spiritswithin"},true) then
+			profile.ogcdtimer = Now()
 			return true
-		end			
+		end
+		if (TimeSince(profile.ogcdtimer) > 3000) and (currentTarget.distance < 5) and profile.checkEach({"circleofscorn"},false) then
+			profile.ogcdtimer = Now()
+			return true
+		end				
 		
 		--caster part
 		if not HasBuff(Player.id,1368) and Player.mp["percent"] == 100 and profile.checkEach({"requiescat"},true) then
@@ -142,6 +153,7 @@ function profile.Cast()
 			return true
 		end
 
+		--123 124 single / 12 aoe
 		if profile.counttarget() > 1 then
 			if (Player.lastcomboid == 7381) and profile.checkEach({"prominence"},false) then
 				return true

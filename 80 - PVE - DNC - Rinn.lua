@@ -3,7 +3,7 @@ local profile = {}
 profile.GUI = {
     open = false,
     visible = true,
-    name = "PVE DNC 80",
+    name = "PVE DNC 80 1.0",
 }
  
 profile.classes = {
