@@ -7,7 +7,7 @@ profile.GUI = {
 }
  
 profile.classes = {
-    [FFXIV.JOBS.PALADIN] = true,
+	[FFXIV.JOBS.PALADIN] = true,
 	[FFXIV.JOBS.GLADIATOR] = true,
 } 
 
