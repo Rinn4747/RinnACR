@@ -8,6 +8,7 @@ profile.GUI = {
  
 profile.classes = {
     [FFXIV.JOBS.WARRIOR] = true,
+	[FFXIV.JOBS.MARAUDER] = true,
 } 
 
 --2587
