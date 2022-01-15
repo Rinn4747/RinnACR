@@ -34,6 +34,7 @@ varwarrior =
 		--bloodwhetting = {25752,true},
 		primalrend = {25753,true},
 		berserk = {38,false},
+		defiance = {48,false},
 		
 
 	}
@@ -90,24 +91,33 @@ function profile.Cast()
 		--tomahawk if distance2d > 10
 		--math.distance2d(Player.pos.x,Player.pos.y,currentTarget.pos.x,currentTarget.pos.y) > 6
 		--and (not currentTarget.aggro)
+		
+		--stance
+		if (not HasBuff(Player.id,91)) and profile.checkEach({"defiance"},true) then
+			return true
+		end				
+		--range 18y
 		if (currentTarget.distance > 10) and profile.checkEach({"tomahawk"},true) then
 			return true
 		end		
 		--buff  1177
-		if  (HasBuff(Player.id,2677) or (Player.level < 50)) and profile.checkEach({"berserk","innerrelease"},true) then
+		if (currentTarget.distance < 5 ) and (HasBuff(Player.id,2677) or (Player.level < 50)) and profile.checkEach({"berserk","innerrelease"},true) then
 			return true
 		end		
 		--ogcd buffid = 1897
-		if (not HasBuff(Player.id,1177)) and (not HasBuff(Player.id,1897)) and HasBuff(Player.id,2677) and profile.checkEach({"infuriate"},true) then
+		if (TimeSince(profile.ogcdtimer) > 3000) and  (currentTarget.distance < 5 ) and (not HasBuff(Player.id,1177)) and (not HasBuff(Player.id,1897)) and HasBuff(Player.id,2677) and profile.checkEach({"infuriate"},true) then
+			profile.ogcdtimer = Now()
 			return true
 		end
 		--ogcd attacks
 		if profile.counttarget() > 1 then
-			if profile.checkEach({"orogeny"},false) then
+			if (TimeSince(profile.ogcdtimer) > 3000) and   profile.checkEach({"orogeny"},false) then
+				profile.ogcdtimer = Now()
 				return true
 			end			
 		else
-			if profile.checkEach({"upheaval"},true) then
+			if (TimeSince(profile.ogcdtimer) > 3000) and  profile.checkEach({"upheaval"},true) then
+				profile.ogcdtimer = Now()
 				return true
 			end
 		end
