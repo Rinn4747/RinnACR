@@ -11,8 +11,14 @@ profile.classes = {
 	[FFXIV.JOBS.MARAUDER] = true,
 } 
 
---2587
-varwarrior = 
+profile.warriorBuff = 
+	{
+		defiance = 91,
+		stormeye = 2677,
+		innerrelease = 1177,
+		infuriate = 1897,
+	}
+profile.warriorSkill = 
 	{
 		heavyswing = {31,true},
 		maim = {37,true},
@@ -39,9 +45,22 @@ varwarrior =
 		
 
 	}
+	
+function profile:skillID(string)
+	if profile.warriorSkill[string] ~= nil then
+		return profile.warriorSkill[string][1]
+	end
+end
 
-stunlist = {}
-stuntimer = 0
+function profile:hasBuffIDSelf(string)
+	if profile.warriorBuff[string] ~= nil then
+		if HasBuff(Player.id,profile.warriorBuff[string]) then
+			return true
+		end
+	end
+	return false
+end
+
 profile.ogcdtimer = 0
 
 function profile.counttarget()
@@ -56,7 +75,7 @@ function profile.counttarget()
 end
  
 function profile.setVar()
-	for i,e in pairs(varwarrior) do
+	for i,e in pairs(profile.warriorSkill) do
 		profile[i] = ActionList:Get(1,e[1])
 		if profile[i] then
 			if e[2] then
@@ -94,7 +113,7 @@ function profile.Cast()
 		--and (not currentTarget.aggro)
 		
 		--stance
-		if (not HasBuff(Player.id,91)) and profile.checkEach({"defiance"},true) then
+		if (not profile:hasBuffIDSelf("defiance")) and profile.checkEach({"defiance"},true) then
 			return true
 		end				
 		--range 18y
@@ -107,11 +126,11 @@ function profile.Cast()
 			-- return true
 		-- end			
 		--buff  1177
-		if (currentTarget.distance < 5 ) and (HasBuff(Player.id,2677) or (Player.level < 50)) and profile.checkEach({"berserk","innerrelease"},true) then
+		if (currentTarget.distance < 5 ) and (profile:hasBuffIDSelf("stormeye") or (Player.level < 50)) and profile.checkEach({"berserk","innerrelease"},true) then
 			return true
 		end		
 		--ogcd buffid = 1897
-		if (TimeSince(profile.ogcdtimer) > 3000) and  (currentTarget.distance < 5 ) and (not HasBuff(Player.id,1177)) and (not HasBuff(Player.id,1897)) and HasBuff(Player.id,2677) and profile.checkEach({"infuriate"},true) then
+		if (TimeSince(profile.ogcdtimer) > 3000) and  (currentTarget.distance < 5 ) and (not profile:hasBuffIDSelf("innerrelease")) and (not profile:hasBuffIDSelf("infuriate")) and profile:hasBuffIDSelf("stormeye") and profile.checkEach({"infuriate"},true) then
 			profile.ogcdtimer = Now()
 			return true
 		end
@@ -132,18 +151,18 @@ function profile.Cast()
 		end	
 		--gauge -50
 		if profile.counttarget() > 1 then
-			if Player.gauge ~= nil and ((Player.gauge[1] >= 50) or (HasBuff(Player.id,1177))) and profile.checkEach({"steelcyclone","decimate","innercyclone"},true)  then
+			if Player.gauge ~= nil and ((Player.gauge[1] >= 50) or (profile:hasBuffIDSelf("innerrelease"))) and profile.checkEach({"steelcyclone","decimate","innercyclone"},true)  then
 				return true
 			end		
 		else
-			if Player.gauge ~= nil and ((Player.gauge[1] >= 50) or (HasBuff(Player.id,1177)))  and profile.checkEach({"innerbeast","fellcleave","innerchaos"},true)  then
+			if Player.gauge ~= nil and ((Player.gauge[1] >= 50) or (profile:hasBuffIDSelf("innerrelease")))  and profile.checkEach({"innerbeast","fellcleave","innerchaos"},true)  then
 				return true
 			end
 		end
 		
 		--123 124 singe / aoe 12
 		if profile.counttarget() > 1 then
-			if Player.lastcomboid == 41 and profile.checkEach({"mythriltempest"},false) then
+			if Player.lastcomboid == profile:skillID("overpower")  and profile.checkEach({"mythriltempest"},false) then
 				return true
 			end		
 			if profile.checkEach({"overpower"},true) then
@@ -151,14 +170,14 @@ function profile.Cast()
 			end		
 			
 		else
-			if not HasBuff(Player.id,2677) and Player.lastcomboid == 37 and profile.checkEach({"stormeye"},true) then
+			if not profile:hasBuffIDSelf("stormeye") and Player.lastcomboid == profile:skillID("maim") and profile.checkEach({"stormeye"},true) then
 				return true
 			end
 			
-			if Player.lastcomboid == 37 and profile.checkEach({"stormpath"},true) then
+			if Player.lastcomboid == profile:skillID("maim") and profile.checkEach({"stormpath"},true) then
 				return true
 			end		
-			if Player.lastcomboid == 31 and profile.checkEach({"maim"},true) then
+			if Player.lastcomboid == profile:skillID("heavyswing") and profile.checkEach({"maim"},true) then
 				return true
 			end
 			
