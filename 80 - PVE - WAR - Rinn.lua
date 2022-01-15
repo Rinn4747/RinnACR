@@ -35,6 +35,7 @@ varwarrior =
 		primalrend = {25753,true},
 		berserk = {38,false},
 		defiance = {48,false},
+		onslaught={7386,true},
 		
 
 	}
@@ -99,7 +100,12 @@ function profile.Cast()
 		--range 18y
 		if (currentTarget.distance > 10) and profile.checkEach({"tomahawk"},true) then
 			return true
-		end		
+		end
+		--safety measure
+		-- if (currentTarget.distance < 5 ) and (not Player:IsMoving()) and (TimeSince(profile.ogcdtimer) > 3000) and profile.checkEach({"onslaught"},true) then
+			-- profile.ogcdtimer = Now()
+			-- return true
+		-- end			
 		--buff  1177
 		if (currentTarget.distance < 5 ) and (HasBuff(Player.id,2677) or (Player.level < 50)) and profile.checkEach({"berserk","innerrelease"},true) then
 			return true
@@ -123,7 +129,7 @@ function profile.Cast()
 		end
 		if profile.checkEach({"primalrend"},true) then
 			return true
-		end			
+		end	
 		--gauge -50
 		if profile.counttarget() > 1 then
 			if Player.gauge ~= nil and ((Player.gauge[1] >= 50) or (HasBuff(Player.id,1177))) and profile.checkEach({"steelcyclone","decimate","innercyclone"},true)  then
