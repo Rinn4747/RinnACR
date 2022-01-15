@@ -5,6 +5,7 @@ profile.GUI = {
     visible = true,
     name = "PVE RPR 70 Alt 1.0",
 }
+--rotation to try and fit most of the positional under true north buff
  
 profile.classes = {
     [FFXIV.JOBS.REAPER] = true,
