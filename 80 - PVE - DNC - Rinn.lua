@@ -3,15 +3,22 @@ local profile = {}
 profile.GUI = {
     open = false,
     visible = true,
-    name = "PVE DNC 80 1.0",
+    name = "PVE DNC 80 1.1",
 }
  
 profile.classes = {
     [FFXIV.JOBS.DANCER] = true,
 } 
 
---2587
-vardancer = 
+profile.dancerBuff = 
+	{
+		standardstepcomplete = 1821,
+		standarstepevaluation = 1818,
+		technicalstepcomplete = 1822,
+		technicalstepevaluation = 1819,		
+	}
+
+profile.dancerSkill = 
 	{
 		cascade = {15989,true},
 		fountain = {15990,true},
@@ -36,9 +43,52 @@ vardancer =
 		flourish = {16013,false},
 	}
 
-stunlist = {}
-stuntimer = 0
+function profile:skillID(string)
+	if profile.dancerSkill[string] ~= nil then
+		return profile.dancerSkill[string][1]
+	end
+end
+
+function profile:lastUsedCombo(string)
+	if profile:skillID(string) ~= nil then
+		if Player.lastcomboid == profile:skillID(string) then
+			return true
+		end
+	end
+	return false
+end
+
+
+function profile:hasBuffSelf(string)
+	if profile.dancerBuff[string] ~= nil then
+		if HasBuff(Player.id,profile.dancerBuff[string]) then
+			return true
+		end
+	end
+	return false
+end
+
+function profile:hasBuffOthers(string)
+	if profile.dancerBuff[string] ~= nil then
+		if HasBuff(MGetTarget().id,profile.dancerBuff[string]) then
+			return true
+		end
+	end
+	return false
+end
+
+function profile:hasBuffOthersDuration(string,duration)
+	if profile.dancerBuff[string] ~= nil then
+		if HasBuff(MGetTarget().id,profile.dancerBuff[string],0,duration) then
+			return true
+		end
+	end
+	return false
+end
+
 profile.ogcdtimer = 0
+profile.safejump = 0
+
 
 function profile.counttarget()
 	local counter = 0
@@ -51,8 +101,22 @@ function profile.counttarget()
 	return counter
 end
  
+function profile.hasNotMovedFor(number)
+	if TimeSince(profile.safejump) > number then
+		return true
+	end
+	return false
+end
+
+function profile.waitedOGCD(number)
+	if TimeSince(profile.ogcdtimer) > number then
+		return true
+	end
+	return false
+end
+ 
 function profile.setVar()
-	for i,e in pairs(vardancer) do
+	for i,e in pairs(profile.dancerSkill) do
 		profile[i] = ActionList:Get(1,e[1])
 		if profile[i] then
 			if e[2] then
@@ -64,7 +128,8 @@ function profile.setVar()
 	end
 end 
 
-function profile.checkEach(tbl,bool)
+function profile.checkEach(tbl,string)
+	local bool = (string == nil)
 	for _,e in pairs(tbl) do
 		if bool then
 			if profile[tostring(e)]["isready"] then
@@ -90,116 +155,117 @@ function profile.Cast()
 
 
 		--ogcd offensive buff
-		if profile.checkEach({"flourish"},true) then
+		if profile.checkEach({"flourish"}) then
 			return true
 		end	
 		--devilment to add
 		
 		--ogcd procs
-		if profile.checkEach({"fandance"},true) then
+		if profile.checkEach({"fandance"}) then
 			return true
 		end
-		if profile.checkEach({"fandance2"},true) then
+		if profile.checkEach({"fandance2"}) then
 			return true
 		end
-		if profile.checkEach({"fandance3"},true) then
+		if profile.checkEach({"fandance3"}) then
 			return true
 		end
 		
 		--ogcd gauge
-		if Player.gauge ~= nil and Player.gauge[2] >= 50 and profile.checkEach({"saberdance"},true) then
+		if Player.gauge ~= nil and Player.gauge[2] >= 50 and profile.checkEach({"saberdance"}) then
 			return true
 		end		
 		--procs gcd
-		if profile.checkEach({"reversecascade"},true) then
+		if profile.checkEach({"reversecascade"}) then
 			return true
 		end				
-		if profile.checkEach({"fountainfall"},true) then
+		if profile.checkEach({"fountainfall"}) then
 			return true
 		end
-		if profile.checkEach({"risingwindmill"},false) then
+		if profile.checkEach({"risingwindmill"},"player") then
 			return true
 		end
-		if profile.checkEach({"bloodshower"},false) then
+		if profile.checkEach({"bloodshower"},"player") then
 			return true
 		end		
 
 		--standard steps
-		if not HasBuff(Player.id,1821) and profile.checkEach({"standardstep"},true) then
+		if not profile:hasBuffSelf("standardstepcomplete") and profile.checkEach({"standardstep"}) then
 			return true
 		end
 		
-		if HasBuff(Player.id,1818) then
+		if profile:hasBuffSelf("standarstepevaluation") then
 			if Player.gauge ~= nil and Player.gauge[7] == 0 then
 				local firstmove = Player.gauge[3]
-				if profile.checkEach({profile.steps[firstmove]},false) then
+				if profile.checkEach({profile.steps[firstmove]},"player") then
 					return true
 				end
 			end
 			if Player.gauge ~= nil and Player.gauge[7] == 1 then
 				local secondmove = Player.gauge[4]
-				if profile.checkEach({profile.steps[secondmove]},false) then
+				if profile.checkEach({profile.steps[secondmove]},"player") then
 					return true
 				end
 			end
 			if Player.gauge ~= nil and Player.gauge[7] == 2 then
-				if profile.checkEach({"standardfinish"},false) then
+				if profile.checkEach({"standardfinish"},"player") then
 					return true
 				end
 			end			
 		end
 			
 		--technical steps
-		if not HasBuff(Player.id,1822) and profile.checkEach({"technicalstep"},true) then
+		if not profile:hasBuffSelf("technicalstepcomplete") and profile.checkEach({"technicalstep"}) then
 			return true
 		end
 		
-		if HasBuff(Player.id,1819) then
+		if profile:hasBuffSelf("technicalstepevaluation") then
 			if Player.gauge ~= nil and Player.gauge[7] == 0 then
 				local firstmove = Player.gauge[3]
-				if profile.checkEach({profile.steps[firstmove]},false) then
+				if profile.checkEach({profile.steps[firstmove]},"player") then
 					return true
 				end
 			end
 			if Player.gauge ~= nil and Player.gauge[7] == 1 then
 				local secondmove = Player.gauge[4]
-				if profile.checkEach({profile.steps[secondmove]},false) then
+				if profile.checkEach({profile.steps[secondmove]},"player") then
 					return true
 				end
 			end
 			if Player.gauge ~= nil and Player.gauge[7] == 2 then
 				local thirdmove = Player.gauge[5]
-				if profile.checkEach({profile.steps[thirdmove]},false) then
+				if profile.checkEach({profile.steps[thirdmove]},"player") then
 					return true
 				end
 			end
 			if Player.gauge ~= nil and Player.gauge[7] == 3 then
 				local fourthmove = Player.gauge[6]
-				if profile.checkEach({profile.steps[fourthmove]},false) then
+				if profile.checkEach({profile.steps[fourthmove]},"player") then
 					return true
 				end
 			end			
 			if Player.gauge ~= nil and Player.gauge[7] == 4 then
-				if profile.checkEach({"technicalfinish"},false) then
+				if profile.checkEach({"technicalfinish"},"player") then
 					return true
 				end
 			end			
 		end		
-		--12 combo / aoe 12 combo
 		
+		
+		--12 combo / aoe 12 combo
 		if profile.counttarget() > 2 then
-			if Player.lastcomboid == vardancer["windmill"][1] and profile.checkEach({"bladeshower"},true) then
+			if profile:lastUsedCombo("windmill") and profile.checkEach({"bladeshower"}) then
 				return true
 			end		
-			if profile.checkEach({"windmill"},true) then
+			if profile.checkEach({"windmill"}) then
 				return true
 			end		
 		else
-			if Player.lastcomboid == vardancer["cascade"][1] and profile.checkEach({"fountain"},true) then
+			if profile:lastUsedCombo("cascade") and profile.checkEach({"fountain"}) then
 				return true
 			end
 			
-			if profile.checkEach({"cascade"},true) then
+			if profile.checkEach({"cascade"}) then
 				return true
 			end
 		end
