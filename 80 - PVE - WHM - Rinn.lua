@@ -15,10 +15,17 @@ profile.whitemageBuff =
 	{
 		dia = 1871,
 		freecure = 155,
-	}
+		aero = 143,
+		aero2 = 144,
+		medica2 = 150,
+		regen = 158,
+	}	
 
 profile.whitemageSkill = 
 	{
+
+		aero2 = {132,true},
+		stone3 = {3568,true},
 		dia = {16532,true},
 		glare = {16533,true},
 		holy = {139,false},
@@ -33,6 +40,18 @@ profile.whitemageSkill =
 		afflatussolace = {16531,true},
 		afflatusrapture = {16534,true},
 		afflatusmisery = {16535,true},
+		asylum = {3569,true},
+		benediction = {140,true},
+		swiftcast = {7561,false},
+		pom = {136,false},
+		plenaryindulgence = {7433,false},
+		temperance = {16536,false},
+		divinebenison = {7432,true},
+		regen = {137,true},
+		medica2 = {133,false},
+		stone2 = {127,true},
+		stone = {119,true},
+		aero = {121,true},
 	}
 	
 function profile:skillID(string)
@@ -92,17 +111,21 @@ function profile.isValidHealTarget(e)
 	return false
 end
 
-function profile.getBestTrustHealTarget( npc, range, hp, whitelist )	
+function profile.getBestHealTarget( npc, range, hp, whitelist )	
 	local npc = npc
 	if (npc == nil) then npc = false end
 	local range = range or ml_global_information.AttackRange
 	local hp = hp or 95
 	local whitelist = IsNull(whitelist,"")
-	
+	local trusts = MEntityList("chartype=9,distance2d=24")
 	local search = ""
 	local healables = {}
-	
-	search = "chartype=9,targetable,maxdistance="..tostring(range)
+	if trusts ~= nil then
+		search = "alive,chartype=9,targetable,maxdistance="..tostring(range)
+	else	
+		search = "alive,friendly,chartype=4,myparty,targetable,maxdistance="..tostring(range)
+	end
+	--search = "chartype=9,targetable,maxdistance="..tostring(range)
 	if (whitelist ~= "") then search = search .. ",contentid=" .. tostring(whitelist) end
 	
 	local el = MEntityList(search)	
@@ -158,12 +181,49 @@ function profile.getBestTrustHealTarget( npc, range, hp, whitelist )
     return nil
 end
 
-function profile.countLowHPTrustTarget(range,from)	
+function profile.getTankTarget()	
+	if (npc == nil) then npc = false end
+	local range = range or ml_global_information.AttackRange
+	local hp = 100
+	local trusts = MEntityList("chartype=9,distance2d=24")
+	local search = ""
+	local healables = {}
+	if trusts ~= nil then
+		search = "alive,chartype=9,targetable,maxdistance="..tostring(range)
+	else	
+		search = "alive,friendly,chartype=4,myparty,targetable,maxdistance="..tostring(range)
+	end
+	
+	local el = MEntityList(search)	
+	if ( table.valid(el) ) then
+		for i,entity in pairs(el) do
+			if (IsValidHealTarget(entity) and entity.hp.percent <= hp) then
+				healables[i] = entity
+			end
+		end
+		healables[#healables+1] = Player
+	end
+	
+	
+	if (table.valid(healables)) then
+		for i,entity in pairs(healables) do
+			if GetRoleString(entity.job) == "Tank" then
+				return entity
+			end
+		end
+		
+	end
+	
+    return nil
+end
+
+function profile.countLowHPTarget(range,from)	
 	local range = range or ml_global_information.AttackRange
 	local from = IsNull(from,"")
 	local search = ""
 	local healables = {}
 	local lowhp = {}
+	local trusts = MEntityList("chartype=9,distance2d=24")
 	lowhp.hundred = {}
 	lowhp.ninety = {}
 	lowhp.eighty = {}
@@ -175,7 +235,12 @@ function profile.countLowHPTrustTarget(range,from)
 	lowhp.twenty = {}
 	lowhp.ten = {}
 	local resulttable = {}
-	search = "chartype=9,targetable,maxdistance="..tostring(range)
+	if trusts ~= nil then
+		search = "alive,chartype=9,targetable,maxdistance="..tostring(range)
+	else	
+		search = "alive,friendly,chartype=4,myparty,targetable,maxdistance="..tostring(range)
+	end	
+	--search = "chartype=9,targetable,maxdistance="..tostring(range)
 	if (from ~= "") then 
 		search = search .. ",distanceto=" .. tostring(from) 
 	end
@@ -495,24 +560,25 @@ end
  
 profile.targetedFromAfar = false
 profile.firingkenki = 0
-profile.cure1target = 0
-profile.cure2target = 0
+profile.healtarget = 0
 profile.aoehealtarget = {}
 profile.aoehealme = {}
+profile.panicbutton = {}
+profile.tanktarget = 0
 
 function profile.Cast()
     local currentTarget = MGetTarget()
 	profile.setVar()
-	profile.trusts = MEntityList("chartype=9,distance2d=24")
-	if (profile.trusts ~= nil) then
-		profile.cure1target = profile.getBestTrustHealTarget(false,30,95)
-		profile.aoehealtarget = profile.countLowHPTrustTarget(6,profile.cure1target.id)
-	else
-		profile.cure1target = profile.getBestPartyHealTarget(false,30,95)
+	profile.healtarget = profile.getBestHealTarget(false,30,95)
+	profile.aoehealme = profile.countLowHPTarget(15,Player.id)
+	profile.panicbutton = profile.countLowHPTarget(30,Player.id)
+	profile.tanktarget = profile.getTankTarget()
+	if (profile.healtarget ~= nil) and (profile.healtarget ~= 0) then
+		profile.setHealVar("healtarget",profile.healtarget.id)
+		profile.aoehealtarget = profile.countLowHPTarget(6,profile.healtarget.id)
 	end
-	profile.aoehealme = profile.countLowHPTrustTarget(6,Player.id)
-	if (profile.cure1target ~= 0) then
-		profile.setHealVar("cure1target",profile.cure1target.id)
+	if (profile.tanktarget ~= nil) and (profile.tanktarget ~= 0) then
+		profile.setHealVar("tanktarget",profile.tanktarget.id)
 	end
 	profile.setHealVar("player",Player.id)
 	--assize
@@ -524,50 +590,83 @@ function profile.Cast()
 		return true
 	end
 	--tetragrammaton
-	if profile.isValidHealTarget(profile.cure1target) and (profile.cure1target.hp.percent < 50 and (GetRoleString(profile.cure1target.job) ~= "Tank") or (profile.cure1target.hp.percent < 70 and GetRoleString(profile.cure1target.job) == "Tank")) then		
-		if not Player:IsMoving() and profile.healCheckEach({"tetragrammaton"},profile.cure1target.id,"cure1target") then
+	if profile.isValidHealTarget(profile.healtarget) and (profile.healtarget.hp.percent < 50 and (GetRoleString(profile.healtarget.job) ~= "Tank") or (profile.healtarget.hp.percent < 70 and GetRoleString(profile.healtarget.job) == "Tank")) then		
+		if not Player:IsMoving() and profile.healCheckEach({"tetragrammaton"},profile.healtarget.id,"healtarget") then
 			return true
 		end		
 	end
+	--temperance
+	if profile.panicbutton["40"] >= 3 and profile.healCheckEach({"temperance"},Player.id,"player","player") then
+		return true
+	end	
 	--cure3
-	if profile.isValidHealTarget(profile.cure1target) and profile.aoehealtarget["50"] >= 3 and not Player:IsMoving() and profile.healCheckEach({"cure3"},profile.cure1target.id,"cure1target") then
+	if profile.isValidHealTarget(profile.healtarget) and profile.aoehealtarget["50"] >= 3 and not Player:IsMoving() and profile.healCheckEach({"cure3"},profile.healtarget.id,"healtarget") then
 		return true
 	end
+	--plenaryindulgence
+	if profile.aoehealme["60"] >= 3 and profile.healCheckEach({"plenaryindulgence"},Player.id,"player","player") then
+		return true
+	end		
 	--afflatusrapture
-	if profile.aoehealme["70"] >= 3 and not Player:IsMoving() and profile.healCheckEach({"afflatusrapture"},Player.id,"player") then
+	if profile.aoehealme["70"] >= 3 and profile.healCheckEach({"afflatusrapture"},Player.id,"player") then
+		return true
+	end
+	--medica2
+	if not profile:hasBuffSelf("medica2") and profile.aoehealme["70"] >= 3 and not Player:IsMoving() and profile.healCheckEach({"medica2"},Player.id,"player") then
 		return true
 	end	
 	--medica
 	if profile.aoehealme["70"] >= 3 and not Player:IsMoving() and profile.healCheckEach({"medica"},Player.id,"player") then
 		return true
 	end
+	--pom
+	if profile.panicbutton["70"] >= 3 and profile.healCheckEach({"pom"},Player.id,"player","player") then
+		return true
+	end	
+	--asylum
+	if profile.isValidHealTarget(profile.healtarget) and profile.aoehealtarget["90"] >= 3 and profile.healCheckEach({"asylum"},profile.healtarget.id,"healtarget") then
+		return true
+	end
 	--afflatussolace
-	if profile.isValidHealTarget(profile.cure1target) and (profile.cure1target.hp.percent < 50 and (GetRoleString(profile.cure1target.job) ~= "Tank") or (profile.cure1target.hp.percent < 70 and GetRoleString(profile.cure1target.job) == "Tank")) then
-		if profile.healCheckEach({"afflatussolace"},profile.cure1target.id,"cure1target") then
+	if profile.isValidHealTarget(profile.healtarget) and (profile.healtarget.hp.percent < 50 and (GetRoleString(profile.healtarget.job) ~= "Tank") or (profile.healtarget.hp.percent < 70 and GetRoleString(profile.healtarget.job) == "Tank")) then
+		if profile.healCheckEach({"afflatussolace"},profile.healtarget.id,"healtarget") then
 			return true
 		end		
 	end	
 	--thinair
-	if profile.isValidHealTarget(profile.cure1target) and (profile.cure1target.hp.percent < 50 and (GetRoleString(profile.cure1target.job) ~= "Tank") or (profile.cure1target.hp.percent < 70 and GetRoleString(profile.cure1target.job) == "Tank")) then	
+	if profile.isValidHealTarget(profile.healtarget) and (profile.healtarget.hp.percent < 50 and (GetRoleString(profile.healtarget.job) ~= "Tank") or (profile.healtarget.hp.percent < 70 and GetRoleString(profile.healtarget.job) == "Tank")) then	
 		if profile.healCheckEach({"thinair"},Player.id,"player","player") then
 			return true
 		end	
 	end
+	--divine benison
+	if profile.isValidHealTarget(profile.tanktarget) and profile.tanktarget.hp.percent < 50 then
+		if profile.healCheckEach({"divinebenison"},profile.tanktarget.id,"tanktarget") then
+			return true
+		end
+	end		
 	--cure2
-	if profile.isValidHealTarget(profile.cure1target) and (profile.cure1target.hp.percent < 50 and (GetRoleString(profile.cure1target.job) ~= "Tank") or (profile.cure1target.hp.percent < 70 and GetRoleString(profile.cure1target.job) == "Tank")) then
-		if not Player:IsMoving() and profile.healCheckEach({"cure2"},profile.cure1target.id,"cure1target") then
+	if profile.isValidHealTarget(profile.healtarget) and (profile.healtarget.hp.percent < 50 and (GetRoleString(profile.healtarget.job) ~= "Tank") or (profile.healtarget.hp.percent < 70 and GetRoleString(profile.healtarget.job) == "Tank")) then
+		if not Player:IsMoving() and profile.healCheckEach({"cure2"},profile.healtarget.id,"healtarget") then
 			return true
 		end		
 	end
 	--cure2 proc
-	if  profile:hasBuffSelf("freecure") and  profile.isValidHealTarget(profile.cure1target) and profile.cure1target.hp.percent < 95 then
-		if not Player:IsMoving() and profile.healCheckEach({"cure2"},profile.cure1target.id,"cure1target") then
+	if  profile:hasBuffSelf("freecure") and  profile.isValidHealTarget(profile.healtarget) and profile.healtarget.hp.percent < 95 then
+		if not Player:IsMoving() and profile.healCheckEach({"cure2"},profile.healtarget.id,"healtarget") then
+			return true
+		end
+	end
+	--regen
+	if not HasBuff(profile.tanktarget.id,profile.whitemageBuff["regen"]) and profile.isValidHealTarget(profile.tanktarget) and profile.tanktarget.hp.percent < 90 then
+		if profile.healCheckEach({"regen"},profile.tanktarget.id,"tanktarget") then
 			return true
 		end
 	end	
 	--cure1
-	if profile.isValidHealTarget(profile.cure1target) and profile.cure1target.hp.percent < 95 then
-		if not Player:IsMoving() and profile.healCheckEach({"cure"},profile.cure1target.id,"cure1target") then
+	if profile.isValidHealTarget(profile.healtarget) and (profile.healtarget.hp.percent < 95 and (GetRoleString(profile.healtarget.job) ~= "Tank") or (profile.healtarget.hp.percent < 85 and GetRoleString(profile.healtarget.job) == "Tank")) then
+	--if profile.isValidHealTarget(profile.healtarget) and profile.healtarget.hp.percent < 95 then
+		if not Player:IsMoving() and profile.healCheckEach({"cure"},profile.healtarget.id,"healtarget") then
 			return true
 		end
 	end	
@@ -576,18 +675,20 @@ function profile.Cast()
 		if Player:IsMoving() then
 			profile.safejump = Now()
 		end
+		--proc damage afflatus
 		if profile.checkEach({"afflatusmisery"}) then
 			return true
-		end		
+		end
+		--damage dot ability
 		if profile.counttarget() > 2 then
 			if not Player:IsMoving() and profile.checkEach({"holy"},"player") then
 				return true
 			end		
 		else
-			if not profile:hasBuffOthers("dia") and profile.checkEach({"dia"}) then
+			if (not profile:hasBuffOthers("dia") and not profile:hasBuffOthers("aero2") and not profile:hasBuffOthers("aero"))  and profile.checkEach({"aero","aero2","dia"}) then
 				return true
 			end			
-			if not Player:IsMoving() and profile.checkEach({"glare"}) then
+			if not Player:IsMoving() and profile.checkEach({"stone","stone2","stone3","glare"}) then
 				return true
 			end
 		end
