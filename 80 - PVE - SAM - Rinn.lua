@@ -241,17 +241,17 @@ function profile.Cast()
 		end
 		--midaresetsugekka
 		if profile.counttarget() > 2 then
-			if Player.gauge ~= nil and (Player.gauge[2] == 6) and profile.checkEach({"tenkagoten"}) then
+			if not Player:IsMoving() and Player.gauge ~= nil and (Player.gauge[2] == 6) and profile.checkEach({"tenkagoten"}) then
 				return true
 			end		
 		else
-			if Player.gauge ~= nil and (Player.gauge[2] == 7) and profile.checkEach({"midaresetsugekka"}) then
+			if not Player:IsMoving() and Player.gauge ~= nil and (Player.gauge[2] == 7) and profile.checkEach({"midaresetsugekka"}) then
 				return true
 			end
 		end
 		
 		--dot
-		if Player.gauge ~= nil and ((Player.gauge[2] == 1) or (Player.gauge[2] == 2) or (Player.gauge[2] == 4)) and not profile:hasBuffOthers("higanbana") and profile.checkEach({"higanbana"}) then
+		if not Player:IsMoving() and Player.gauge ~= nil and ((Player.gauge[2] == 1) or (Player.gauge[2] == 2) or (Player.gauge[2] == 4)) and not profile:hasBuffOthers("higanbana") and profile.checkEach({"higanbana"}) then
 			return true
 		end
 		
