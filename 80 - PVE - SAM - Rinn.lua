@@ -344,7 +344,7 @@ function profile.Cast()
 					return true
 				end			
 			end
-			if profile:hasBuffSelf("fuka") and profile:hasBuffSelf("fugetsu") and Player.gauge ~= nil and (Player.gauge[2] == 0) then
+			if profile:hasBuffSelf("fuka") and profile:hasBuffSelf("fugetsu") and Player.gauge ~= nil and ((Player.gauge[2] == 0) or (Player.gauge[2] == 4)) then
 				if profile:lastUsedCombo("jinpu") and profile.checkEach({"gekko"}) then
 					return true
 				end
