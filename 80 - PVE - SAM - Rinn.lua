@@ -34,7 +34,7 @@ profile.samuraiSkill =
 		oka = {7485,false},
 		meditate = {7497,false},
 		ikishoten = {16482,false},
-		hagakure = {7495,true},
+		hagakure = {7495,false},
 		mekyoshisui = {7499,false},
 		hissatsukaiten = {7494,false},
 		kaeshihiganbana = {16484,true},
@@ -230,6 +230,12 @@ function profile.Cast()
 			end		
 		else
 			if not profile:hasBuffSelf("kaiten") and Player.gauge ~= nil and (Player.gauge[2] == 7) and profile.checkEach({"hissatsukaiten"}) then
+				return true
+			end
+		end
+		--hagakure
+		if profile.counttarget() > 2 then
+			if Player.gauge ~= nil and (Player.gauge[2] == 7) and profile.checkEach({"hagakure"},"player") then
 				return true
 			end
 		end
