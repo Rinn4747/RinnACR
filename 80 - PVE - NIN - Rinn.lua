@@ -193,7 +193,7 @@ function profile.Cast()
 		--d("casting ninjutsu : "..tostring(profile.castingNinjutsu))
 		--d("ninjutsu result : "..tostring(profile.mudraresult))
 		--tenshijin
-		if profile.checkEach({"tenshijin"},false) and not profile:hasBuffSelf("tenshijin") and not profile.castingNinjutsu then
+		if not profile:hasBuffSelf("tenshijin") and not profile.castingNinjutsu and profile.checkEach({"tenshijin"},false) then
 			profile.ntsj1 = true
 			profile.ntsj2 = true
 			profile.ntsj3 = true
