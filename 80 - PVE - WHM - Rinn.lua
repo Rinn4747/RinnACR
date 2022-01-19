@@ -1,4 +1,4 @@
-profile = {}
+local profile = {}
 
 profile.GUI = {
     open = false,
@@ -19,6 +19,8 @@ profile.whitemageBuff =
 		aero2 = 144,
 		medica2 = 150,
 		regen = 158,
+		swiftcast = 167,
+		raise = 148,
 	}	
 
 profile.whitemageSkill = 
@@ -52,6 +54,7 @@ profile.whitemageSkill =
 		stone2 = {127,true},
 		stone = {119,true},
 		aero = {121,true},
+		raise = {125,true},
 	}
 	
 function profile:skillID(string)
@@ -97,9 +100,6 @@ function profile:hasBuffOthersDuration(string,duration)
 	return false
 end
 
-profile.ogcdtimer = 0
-profile.safejump = 0
-
 function profile.isValidHealTarget(e)
 	if (table.valid(e) and e.alive and e.targetable and not e.aggro) then
 		return (e.chartype == 4) or (e.id == Player.id) or
@@ -111,12 +111,9 @@ function profile.isValidHealTarget(e)
 	return false
 end
 
-function profile.getBestHealTarget( npc, range, hp, whitelist )	
-	local npc = npc
-	if (npc == nil) then npc = false end
+function profile.getBestHealTarget( range, hp )	
 	local range = range or ml_global_information.AttackRange
 	local hp = hp or 95
-	local whitelist = IsNull(whitelist,"")
 	local trusts = MEntityList("chartype=9,distance2d=24")
 	local search = ""
 	local healables = {}
@@ -125,32 +122,17 @@ function profile.getBestHealTarget( npc, range, hp, whitelist )
 	else	
 		search = "alive,friendly,chartype=4,myparty,targetable,maxdistance="..tostring(range)
 	end
-	--search = "chartype=9,targetable,maxdistance="..tostring(range)
-	if (whitelist ~= "") then search = search .. ",contentid=" .. tostring(whitelist) end
 	
 	local el = MEntityList(search)	
 	if ( table.valid(el) ) then
 		for i,entity in pairs(el) do
-			if (IsValidHealTarget(entity) and entity.hp.percent <= hp) then
+			if (profile.isValidHealTarget(entity) and entity.hp.percent <= hp) then
 				healables[i] = entity
 			end
 		end
 		healables[#healables+1] = Player
 	end
 	
-	if (npc) then
-		search = "alive,targetable,maxdistance="..tostring(range)
-		if (whitelist ~= "") then search = search .. ",contentid=" .. tostring(whitelist)  end
-	
-		el = MEntityList(search)
-		if ( table.valid(el) ) then
-			for i,entity in pairs(el) do
-				if (IsValidHealTarget(entity) and entity.hp.percent <= hp) then
-					healables[i] = entity
-				end
-			end
-		end
-	end
 	
 	if (table.valid(healables)) then
 		local lowest = nil
@@ -165,16 +147,6 @@ function profile.getBestHealTarget( npc, range, hp, whitelist )
 		
 		if (lowest) then
 			return lowest
-		end
-	end
-	
-	if (gBotMode == GetString("partyMode") and not IsPartyLeader()) then
-		local leader, isEntity = GetPartyLeader()
-		if (leader and leader.id ~= 0) then
-			local leaderentity = EntityList:Get(leader.id)
-			if (leaderentity and leaderentity.distance <= range and leaderentity.hp.percent <= hp) then
-				return leaderentity
-			end
 		end
 	end
 	
@@ -197,7 +169,7 @@ function profile.getTankTarget()
 	local el = MEntityList(search)	
 	if ( table.valid(el) ) then
 		for i,entity in pairs(el) do
-			if (IsValidHealTarget(entity) and entity.hp.percent <= hp) then
+			if (profile.isValidHealTarget(entity) and entity.hp.percent <= hp) then
 				healables[i] = entity
 			end
 		end
@@ -249,7 +221,7 @@ function profile.countLowHPTarget(range,from)
 	if (table.valid(el)) then
 		for i,entity in pairs(el) do
 		
-			if (IsValidHealTarget(entity)) then
+			if (profile.isValidHealTarget(entity)) then
 				healables[i] = entity
 			end
 			
@@ -319,122 +291,22 @@ function profile.countLowHPTarget(range,from)
 
 end
 
-function profile.getBestPartyHealTarget( npc, range, hp, whitelist )	
-	local npc = npc
-	if (npc == nil) then npc = false end
-	local range = range or ml_global_information.AttackRange
-	local hp = hp or 95
-	local whitelist = IsNull(whitelist,"")
-	
-	local search = ""
-	local healables = {}
-	
-	search = "alive,friendly,chartype=4,myparty,targetable,maxdistance="..tostring(range)
-	if (whitelist ~= "") then search = search .. ",contentid=" .. tostring(whitelist) end
-	
-	local el = MEntityList(search)	
-	if ( table.valid(el) ) then
-		for i,entity in pairs(el) do
-			if (IsValidHealTarget(entity) and entity.hp.percent <= hp) then
-				healables[i] = entity
-			end
-		end
-		--healables[#healables+1] = Player
-	end
-	healables[#healables+1] = Player
-	
-	if (npc) then
-		search = "alive,targetable,maxdistance="..tostring(range)
-		if (whitelist ~= "") then search = search .. ",contentid=" .. tostring(whitelist)  end
-	
-		el = MEntityList(search)
-		if ( table.valid(el) ) then
-			for i,entity in pairs(el) do
-				if (IsValidHealTarget(entity) and entity.hp.percent <= hp) then
-					healables[i] = entity
-				end
-			end
-		end
-	end
-	
-	if (table.valid(healables)) then
-		local lowest = nil
-		local lowesthp = 100
-		
-		for i,entity in pairs(healables) do
-			if (not lowest or (lowest and entity.hp.percent < lowesthp)) then
-				lowest = entity
-				lowesthp = entity.hp.percent
-			end
-		end
-		
-		if (lowest) then
-			return lowest
-		end
-	end
-	
-	if (gBotMode == GetString("partyMode") and not IsPartyLeader()) then
-		local leader, isEntity = GetPartyLeader()
-		if (leader and leader.id ~= 0) then
-			local leaderentity = EntityList:Get(leader.id)
-			if (leaderentity and leaderentity.distance <= range and leaderentity.hp.percent <= hp) then
-				return leaderentity
-			end
-		end
-	end
-	
-    return nil
-end
-
-function profile.getClosestHealTarget()
-    local pID = Player.id
-    local el = MEntityList("nearest,friendly,chartype=4,myparty,targetable,exclude="..tostring(pID)..",maxdistance="..tostring(ml_global_information.AttackRange))
-	--local el = MEntityList("nearest,friendly,chartype=4,myparty,exclude="..tostring(pID)..",maxdistance="..tostring(ml_global_information.AttackRange))
-    if ( table.valid(el) ) then
-        local i,e = next(el)
-        if (i~=nil and e~=nil) then
-            return e
-        end
-    end
-    
-    local el = MEntityList("nearest,friendly,chartype=4,targetable,exclude="..tostring(pID)..",maxdistance="..tostring(ml_global_information.AttackRange))
-	--local el = MEntityList("nearest,friendly,chartype=4,exclude="..tostring(pID)..",maxdistance="..tostring(ml_global_information.AttackRange))
-    if ( table.valid(el) ) then
-        local i,e = next(el)
-        if (i~=nil and e~=nil) then
-            return e
-        end
-    end
-    --ml_debug("GetBestHealTarget() failed with no entity found matching params")
-    return nil
-end
-
-function profile.getBestRevive( party, role)
-	party = IsNull(party,false)
-	role = role or ""
+function profile.getBestRevive()
+	local party = IsNull(party,false)
+	local role = role or ""
 	range = 30
 	
 	local el = nil
-	if (party) then
-		el = MEntityList("myparty,friendly,chartype=4,targtable,dead,maxdistance="..tostring(range))
-	else
-		el = MEntityList("friendly,dead,chartype=4,targetable,maxdistance="..tostring(range))
-	end 
-	
-	-- Filter out the inappropriate roles.
+	local trusts = MEntityList("chartype=9,distance2d=24")
+	if trusts ~= nil then
+		el = MEntityList("dead,chartype=9,targetable,maxdistance="..tostring(range))
+	else	
+		el = MEntityList("dead,friendly,chartype=4,myparty,targetable,maxdistance="..tostring(range))
+	end	
 	local targets = {}
 	if (table.valid(el)) then
-		local roleTable = GetRoleTable(role)
-		if (roleTable) then
-			for id,entity in pairs(el) do
-				if (entity.job and roleTable[entity.job]) then
-					targets[id] = entity
-				end
-			end
-		else
-			for id,entity in pairs(el) do
-				targets[id] = entity
-			end
+		for id,entity in pairs(el) do
+			targets[id] = entity
 		end
 	end
 	
@@ -454,17 +326,6 @@ function profile.getBestRevive( party, role)
 			end
 		end
 	end
-	
-	if (gBotMode == GetString("partyMode") and not IsPartyLeader()) then
-		local leader, isEntity = GetPartyLeader()
-		if (leader and leader.id ~= 0) then
-			local leaderentity = EntityList:Get(leader.id)
-			if (leaderentity and leaderentity.distance <= range and not leader.alive and MissingBuffs(leaderentity, "148")) then
-				return leaderentity
-			end
-		end
-	end
-	
 	return nil
 end
 
@@ -558,20 +419,23 @@ function profile.healCheckEach(tbl,targetid,filter,string)
 	return false
 end
  
-profile.targetedFromAfar = false
-profile.firingkenki = 0
+
+profile.ogcdtimer = 0
+profile.safejump = 0
 profile.healtarget = 0
 profile.aoehealtarget = {}
 profile.aoehealme = {}
 profile.panicbutton = {}
 profile.tanktarget = 0
+profile.revivetarget = 0
 
 function profile.Cast()
     local currentTarget = MGetTarget()
 	profile.setVar()
-	profile.healtarget = profile.getBestHealTarget(false,30,95)
+	profile.healtarget = profile.getBestHealTarget(30,95)
 	profile.aoehealme = profile.countLowHPTarget(15,Player.id)
 	profile.panicbutton = profile.countLowHPTarget(30,Player.id)
+	profile.revivetarget = profile.getBestRevive()
 	profile.tanktarget = profile.getTankTarget()
 	if (profile.healtarget ~= nil) and (profile.healtarget ~= 0) then
 		profile.setHealVar("healtarget",profile.healtarget.id)
@@ -580,7 +444,22 @@ function profile.Cast()
 	if (profile.tanktarget ~= nil) and (profile.tanktarget ~= 0) then
 		profile.setHealVar("tanktarget",profile.tanktarget.id)
 	end
+	if (profile.revivetarget ~= nil) and (profile.revivetarget ~= 0) then
+		profile.setHealVar("revivetarget",profile.revivetarget.id)
+	end
 	profile.setHealVar("player",Player.id)
+	
+	--swift cast raise
+	if (profile.revivetarget ~= nil) and (profile.revivetarget ~= 0) then
+		if profile["raise"]["revivetarget"]["isready"] and profile.healCheckEach({"swiftcast"},Player.id,"player","player") then
+			return true
+		end
+		if profile:hasBuffSelf("swiftcast") and profile.waitedOGCD(2000) and not Player:IsMoving() and not HasBuff(profile.revivetarget.id,profile.whitemageBuff["raise"]) and profile.healCheckEach({"raise"},profile.revivetarget.id,"revivetarget") then
+			profile.ogcdtimer = Now()
+			return true
+		end		
+	end
+	if profile:hasBuffSelf("swiftcast") then return false end
 	--assize
 	if ((profile.aoehealme["90"] >= 2) or (Player.mp.percent < 70)) and profile.healCheckEach({"assize"},Player.id,"player","player") then
 		return true
@@ -640,7 +519,7 @@ function profile.Cast()
 		end	
 	end
 	--divine benison
-	if profile.isValidHealTarget(profile.tanktarget) and profile.tanktarget.hp.percent < 50 then
+	if (profile.tanktarget ~= nil) and (profile.tanktarget ~= 0) and profile.isValidHealTarget(profile.tanktarget) and profile.tanktarget.hp.percent < 50 then
 		if profile.healCheckEach({"divinebenison"},profile.tanktarget.id,"tanktarget") then
 			return true
 		end
@@ -658,7 +537,7 @@ function profile.Cast()
 		end
 	end
 	--regen
-	if not HasBuff(profile.tanktarget.id,profile.whitemageBuff["regen"]) and profile.isValidHealTarget(profile.tanktarget) and profile.tanktarget.hp.percent < 90 then
+	if (profile.tanktarget ~= nil) and (profile.tanktarget ~= 0) and not HasBuff(profile.tanktarget.id,profile.whitemageBuff["regen"]) and profile.isValidHealTarget(profile.tanktarget) and profile.tanktarget.hp.percent < 90 then
 		if profile.healCheckEach({"regen"},profile.tanktarget.id,"tanktarget") then
 			return true
 		end
