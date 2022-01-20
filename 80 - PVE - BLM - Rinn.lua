@@ -184,6 +184,7 @@ function profile.Cast()
 				return true
 			end			
 		else
+			--start 
 			if profile:trueNorth() and Player.gauge ~= nil and Player.gauge[2] == 0 and Player.gauge[1] == 0 and profile.checkEach({"blizzard3"}) then
 				return true
 			end
@@ -218,6 +219,10 @@ function profile.Cast()
 			end
 			--umbral heart through blizzard 4
 			if profile:trueNorth() and Player.gauge ~= nil and Player.gauge[2] == -3 and Player.gauge[1] ~= 3 and profile.checkEach({"blizzard4"}) then			
+				return true
+			end
+			--blizzard3 to fill up mana if <58
+			if profile:trueNorth() and Player.mp.current < 10000 and Player.level < 58 and profile.checkEach({"blizzard3"}) then			
 				return true
 			end
 			
