@@ -1,4 +1,4 @@
-profile = {}
+local profile = {}
 
 profile.GUI = {
     open = false,
