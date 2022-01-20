@@ -20,6 +20,7 @@ profile.classes = {
 buffblackmage = 
 	{
 		firestarter = 165,
+		thunder2 = 7447,
 		thunder3 = 163,
 		thunder4 = 1210,
 		thundercloud = 164,
@@ -123,7 +124,7 @@ function profile.Cast()
 		profile.setVar()
 			
 		--leyline
-		if TimeSince(profile.safejump) > 3000 and profile.checkEach({"leyline"},"player") then
+		if Player.incombat and TimeSince(profile.safejump) > 3000 and profile.checkEach({"leyline"},"player") then
 			RinnBLM.leylines.castpos = Player.pos
 			RinnBLM.leylines.casttime = Now()
 			return true
@@ -139,7 +140,7 @@ function profile.Cast()
 				return true
 			end
 			--proc thunder 4
-			if HasBuff(Player.id,buffblackmage["thundercloud"]) and Player.mp.current < 1000 and profile.checkEach({"thunder4"}) then
+			if HasBuff(Player.id,buffblackmage["thundercloud"]) and Player.mp.current < 1000 and profile.checkEach({"thunder2","thunder4"}) then
 				return true
 			end
 			--manafont
@@ -164,7 +165,7 @@ function profile.Cast()
 				return true
 			end
 			--umbral heart through freeze
-			if profile:trueNorth() and Player.gauge ~= nil and Player.gauge[2] == -3 and Player.gauge[1] ~= 3 and profile.checkEach({"freeze"}) then			
+			if profile:trueNorth() and Player.gauge ~= nil and Player.gauge[2] == -3 and (Player.gauge[1] ~= 3) and (Player.level >= 58) and profile.checkEach({"freeze"}) then			
 				profile.firecycle = true
 				return true
 			end
@@ -221,14 +222,27 @@ function profile.Cast()
 			end
 			
 			--switch to fire cycle
-			if profile:trueNorth() and Player.gauge ~= nil and Player.gauge[2] < 3 and Player.gauge[1] == 3 and profile.checkEach({"fire3"}) then
+			if profile:trueNorth() and Player.gauge ~= nil and Player.gauge[2] < 3 and Player.gauge[1] == 3 and (Player.level >= 58) and profile.checkEach({"fire3"}) then
 				return true
 			end
+			--fire 3 if < 58
+			if profile:trueNorth() and Player.gauge ~= nil and Player.gauge[2] < 3 and (Player.level < 58) and profile.checkEach({"fire3"}) then
+				return true
+			end
+			--despair
 			if Player.mp.current < 2000  and profile.checkEach({"despair"}) then
 				profile.firecycle = false
 				return true
 			end
-			if profile:trueNorth() and Player.mp.current > 0 and Player.gauge ~= nil and Player.gauge[4] > 7000 and profile.checkEach({"fire4"}) then
+			--proc if < 60 (no fire 4) less rigid rotation
+			if HasBuff(Player.id,buffblackmage["thundercloud"]) and Player.mp.current < 1000 and profile.checkEach({"thunder3"}) then
+				return true
+			end			
+			--proc if < 60 (no fire 4)
+			if HasBuff(Player.id,buffblackmage["firestarter"]) and Player.level < 60 and  profile.checkEach({"fire3"}) then
+				return true
+			end			
+			if profile:trueNorth() and Player.mp.current > 0 and Player.gauge ~= nil and Player.gauge[4] > 7000 and profile.checkEach({"fire4","fire"}) then
 				return true
 			end
 			if profile:trueNorth() and Player.mp.current > 0 and Player.gauge ~= nil and Player.gauge[4] <= 7000 and profile.checkEach({"fire"}) then
