@@ -128,12 +128,20 @@ end
  
 function profile.Cast()
     local currentTarget = MGetTarget()
+	local transpose = ActionList:Get(1,149)
+	local transpose_ready = transpose:IsReady(Player)
+	--transpose to ice out of combat <35
+	if Player.level < 35 and not Player.incombat and Player.gauge ~= nil and  Player.gauge[2] > 0 and transpose_ready then
+		transpose:Cast(Player.id)
+		dd("single target mode < 60 : transpose to fire mode")
+		return true
+	end		
 	if (currentTarget) then
 		if Player:IsMoving() then
 			profile.safejump = Now()
 		end	
 		profile.setVar()
-			
+				
 		--leyline
 		if Player.incombat and TimeSince(profile.safejump) > 3000 and profile.checkEach({"leyline"},"player") then
 			RinnBLM.leylines.castpos = Player.pos
@@ -318,6 +326,7 @@ function profile.Cast()
 					return true
 				end				
 			else
+			
 				--start 
 				if profile:trueNorth() and Player.gauge ~= nil and Player.gauge[2] == 0 and Player.gauge[1] == 0 and profile.checkEach({"blizzard3","blizzard"}) then
 					--dd("single target mode < 60 :")
