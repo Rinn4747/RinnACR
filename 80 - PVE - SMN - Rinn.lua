@@ -3,7 +3,7 @@ local profile = {}
 profile.GUI = {
     open = false,
     visible = true,
-    name = "PVE SMN 1.4",
+    name = "PVE SMN 1.5",
 }
  
 profile.classes = {
@@ -60,18 +60,65 @@ varsummoner =
 		topazruin2 = {25812,true},
 		emeraldruin2 = {25813,true},
 		rubyruin2 = {25811,true},
+		resurrection = {173,true},
+		swiftcast = {7561,false},
 	}
 
 profile.ogcdtimer = 0
+
+
+function profile.getBestRevive()
+	local party = IsNull(party,false)
+	local role = role or ""
+	range = 30
+	
+	local el = nil
+	local trusts = MEntityList("chartype=9,distance2d=24")
+	if trusts ~= nil then
+		el = MEntityList("dead,chartype=9,targetable,maxdistance="..tostring(range))
+	else	
+		el = MEntityList("dead,friendly,chartype=4,myparty,targetable,maxdistance="..tostring(range))
+	end	
+	local targets = {}
+	if (table.valid(el)) then
+		for id,entity in pairs(el) do
+			targets[id] = entity
+		end
+	end
+	
+	-- Filter out targets with the res buff.
+	if (targets) then
+		for id,entity in pairs(targets) do
+			if (HasBuffs(entity,"148")) then
+				targets[id] = nil
+			end
+		end
+	end
+	
+	if (targets) then
+		for id,entity in pairs(targets) do
+			if (entity) then
+				return entity
+			end
+		end
+	end
+	return nil
+end
 
 function profile.counttarget(targetid)
 	local targets = MEntityList("alive,attackable,targetable,maxdistance=5,distanceto="..tostring(targetid))
 	return (table.size(targets))
 end	
- 
+
 function profile.setVar()
 	for i,e in pairs(varsummoner) do
 		profile[i] = ActionList:Get(1,e[1])
+	end
+end 
+ 
+function profile.setSkillVar()
+	for i,e in pairs(varsummoner) do
+		--profile[i] = ActionList:Get(1,e[1])
 		if profile[i] then
 			if e[2] then
 				profile[i]["isready"] = profile[i]:IsReady(MGetTarget().id)
@@ -99,12 +146,31 @@ function profile.checkEach(tbl,bool)
 	return false
 end 
  
+profile.revivetarget = 0 
+ 
 function profile.Cast()
     local currentTarget = MGetTarget()
 	local g = Player.gauge
-	
+	profile.setVar()
+	profile.revivetarget = profile.getBestRevive()
+	if (Player.level >= 12) and (profile.revivetarget ~= nil) and (profile.revivetarget ~= 0) then
+		profile["swiftcast"]["isready"] = profile["swiftcast"]:IsReady(Player.id)
+		profile["resurrection"]["revivetarget"] = {}
+		profile["resurrection"]["revivetarget"]["isready"] = profile["resurrection"]:IsReady(profile.revivetarget.id)
+		if profile["resurrection"]["revivetarget"]["isready"] then
+			if not HasBuff(Player.id,167) and profile["swiftcast"]["isready"] then
+				profile["swiftcast"]:Cast(Player.id)
+				return true
+			end
+			if HasBuff(Player.id,167) and not HasBuff(profile.revivetarget.id,148) then --148 status effect raise --167 swiftcast
+				profile["resurrection"]:Cast(profile.revivetarget.id)
+				return true
+			end
+		end
+	end	
+	if (Player.level >= 12) and HasBuff(Player.id,167) and ((profile.revivetarget ~= nil) and (profile.revivetarget ~= 0)) and not HasBuff(profile.revivetarget.id,148) then return false end
 	if (currentTarget) then
-		profile.setVar()
+		profile.setSkillVar()
 		if (Player.gauge ~= nil) and (Player.gauge[1] == 0) and (Player.gauge[2] == 0) and (Player.pet == nil) and profile.checkEach({"carbuncle"},false) then
 			return true
 		end	
