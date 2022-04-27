@@ -3,9 +3,9 @@ local profile = {}
 profile.GUI = {
     open = false,
     visible = true,
-    name = "PVE SAM 80 1.1",
-    --6.1 update
+    name = "PVE SAM 80 1.0",
 }
+--updated for 6.1
  
 profile.classes = {
     [FFXIV.JOBS.SAMURAI] = true,
@@ -174,6 +174,7 @@ function profile.Cast()
 			--getsu => 2
 			--setsu => 1
 		--gauge[3] ==> shoha
+		--hissatsukaiten removed
 		if profile.counttarget() > 2 then
 			-- if not profile:hasBuffSelf("kaiten") and profile["kaeshigoken"]["isready"] and  profile.checkEach({"hissatsukaiten"}) then
 				-- return true
@@ -224,16 +225,16 @@ function profile.Cast()
 		if Player.gauge ~= nil and (Player.gauge[3] == 3) and profile.checkEach({"shoha"}) then
 			return true
 		end
-		--midare boost
-		if profile.counttarget() > 2 then
-			if not profile:hasBuffSelf("kaiten") and Player.gauge ~= nil and (Player.gauge[2] == 6) and profile.checkEach({"hissatsukaiten"}) then
-				return true
-			end		
-		else
-			if not profile:hasBuffSelf("kaiten") and Player.gauge ~= nil and (Player.gauge[2] == 7) and profile.checkEach({"hissatsukaiten"}) then
-				return true
-			end
-		end
+		--midare boost --hissatsukaiten removed
+		-- if profile.counttarget() > 2 then
+			-- if not profile:hasBuffSelf("kaiten") and Player.gauge ~= nil and (Player.gauge[2] == 6) and profile.checkEach({"hissatsukaiten"}) then
+				-- return true
+			-- end		
+		-- else
+			-- if not profile:hasBuffSelf("kaiten") and Player.gauge ~= nil and (Player.gauge[2] == 7) and profile.checkEach({"hissatsukaiten"}) then
+				-- return true
+			-- end
+		-- end
 		--hagakure
 		if profile.counttarget() > 2 then
 			if Player.gauge ~= nil and (Player.gauge[2] == 7) and profile.checkEach({"hagakure"},"player") then
