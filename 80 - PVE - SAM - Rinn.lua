@@ -3,7 +3,8 @@ local profile = {}
 profile.GUI = {
     open = false,
     visible = true,
-    name = "PVE SAM 80 1.0",
+    name = "PVE SAM 80 1.1",
+    --6.1 update
 }
  
 profile.classes = {
@@ -27,7 +28,7 @@ profile.samuraiSkill =
 		kasha = {7482,true},
 		yukikaze = {7480,true},
 		higanbana = {7489,true},
-		tenkagoten = {7488,true},
+		tenkagoten = {7488,false},
 		midaresetsugekka = {7487,true},
 		fuga = {7483,true},
 		mangetsu = {7484,false},
@@ -38,7 +39,7 @@ profile.samuraiSkill =
 		mekyoshisui = {7499,false},
 		hissatsukaiten = {7494,false},
 		kaeshihiganbana = {16484,true},
-		kaeshigoken = {16485,true},
+		kaeshigoken = {16485,false},
 		kaeshisetsugekka = {16486,true},
 		--tsubamegaeshi = {16137,true},
 		
@@ -174,17 +175,17 @@ function profile.Cast()
 			--setsu => 1
 		--gauge[3] ==> shoha
 		if profile.counttarget() > 2 then
-			if not profile:hasBuffSelf("kaiten") and profile["kaeshigoken"]["isready"] and  profile.checkEach({"hissatsukaiten"}) then
-				return true
-			end
+			-- if not profile:hasBuffSelf("kaiten") and profile["kaeshigoken"]["isready"] and  profile.checkEach({"hissatsukaiten"}) then
+				-- return true
+			-- end
 			--tsubamegaeshi
 			if profile.checkEach({"kaeshigoken"}) then
 				return true
 			end		
 		else
-			if not profile:hasBuffSelf("kaiten") and profile["kaeshisetsugekka"]["isready"] and  profile.checkEach({"hissatsukaiten"}) then
-				return true
-			end
+			-- if not profile:hasBuffSelf("kaiten") and profile["kaeshisetsugekka"]["isready"] and  profile.checkEach({"hissatsukaiten"}) then
+				-- return true
+			-- end
 			--tsubamegaeshi
 			if profile.checkEach({"kaeshisetsugekka"}) then
 				return true
