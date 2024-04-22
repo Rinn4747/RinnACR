@@ -1,60 +1,26 @@
 [
     {
-        "Author": "Tischel, ArchiTed",
-        "Name": "ActionTimelineEx",
-        "InternalName": "ActionTimelineEx",
-        "AssemblyVersion": "v1.3.6",
-        "Description": "Configurable timeline display of all the actions you use.",
-        "ApplicableVersion": "any",
-        "RepoUrl": "https://github.com/ArchiDog1998/ActionTimelineEx",
-        "Tags": [
-            "UI"
-        ],
-        "CategoryTags": [
-            "UI"
-        ],
-        "DalamudApiLevel": 9,
-        "LoadRequiredState": 0,
-        "LoadSync": false,
-        "CanUnloadAsync": false,
-        "LoadPriority": 0,
-        "ImageUrls": [
-            "https://raw.githubusercontent.com/ArchiDog1998/ActionTimelineEx/main/Images/example.gif"
-        ],
-        "IconUrl": "https://xivapi.com/i/000000/000073_hr1.png",
-        "Punchline": "Show your actions in real-time.",
-        "AcceptsFeedback": true,
-        "DownloadLinkInstall": "https://github.com/ArchiDog1998/ActionTimelineEx/releases/download/v1.3.6/latest.zip",
-        "DownloadLinkUpdate": "https://github.com/ArchiDog1998/ActionTimelineEx/releases/download/v1.3.6/latest.zip",
-        "DownloadCount": 664,
-        "Changelog": "## [1.3.6](https://github.com/ArchiDog1998/ActionTimelineEx/compare/v1.3.5...v1.3.6) (2024-03-27)\n\n\n### Bug Fixes\n\n* add an option for hide in cutscene. ([4eec607](https://github.com/ArchiDog1998/ActionTimelineEx/commit/4eec60791aca29385934ca3d2c348e9bd4558b21))\n* add an option for hiding in quest event. ([b4380a9](https://github.com/ArchiDog1998/ActionTimelineEx/commit/b4380a97e68374206ae14af42830fad94fdb5d40))\n* better icon. ([be6eaa0](https://github.com/ArchiDog1998/ActionTimelineEx/commit/be6eaa0f24d20a9f6ea71ece1b744da1b138f0fd))\n* gcd check. ([faa2e7f](https://github.com/ArchiDog1998/ActionTimelineEx/commit/faa2e7fe49d02cc4598e09d59a5be80ef964dde5))\n* ui hidden fix. ([20e72e5](https://github.com/ArchiDog1998/ActionTimelineEx/commit/20e72e5f4a79e72e84fa61bc5651b36bc82ae5e0))\n* work flow. ([1dc09b9](https://github.com/ArchiDog1998/ActionTimelineEx/commit/1dc09b9b513b30561bc0bf595448af8d5aaea7fa))"
-    },
-    {
-        "Author": "ArchiTed, matrix",
-        "Name": "Fake Name",
-        "InternalName": "FakeName",
-        "AssemblyVersion": "v1.1.2",
-        "Description": "Show a fake name on your game ui.\n\nIf it messed up your chat box, please use chat2!",
-        "ApplicableVersion": "any",
-        "RepoUrl": "https://github.com/ArchiDog1998/FakeName",
-        "Tags": [
-            "name",
-            "ui"
-        ],
-        "CategoryTags": [
-            "ui"
-        ],
-        "DalamudApiLevel": 9,
-        "LoadRequiredState": 0,
-        "LoadSync": false,
-        "CanUnloadAsync": false,
-        "LoadPriority": 0,
-        "IconUrl": "https://raw.githubusercontent.com/ArchiDog1998/FakeName/main/icon.png",
-        "Punchline": "Show a fake name on your game ui.",
-        "AcceptsFeedback": true,
-        "DownloadLinkInstall": "https://github.com/ArchiDog1998/FakeName/releases/download/v1.1.2/latest.zip",
-        "DownloadLinkUpdate": "https://github.com/ArchiDog1998/FakeName/releases/download/v1.1.2/latest.zip",
-        "DownloadCount": 1288,
-        "Changelog": "## [1.1.2](https://github.com/ArchiDog1998/FakeName/compare/v1.1.1...v1.1.2) (2024-04-11)\r\n\r\n\r\n### Bug Fixes\r\n\r\n* add xiv config ui submodule. ([2046c66](https://github.com/ArchiDog1998/FakeName/commit/2046c661f26b299530bae54147df7c3f3a2ba529))\r\n* fixed sth. ([07335e3](https://github.com/ArchiDog1998/FakeName/commit/07335e3278ca7ae5718b8614fc6ba1d21f77db50))\r\n* fixed ui. ([6a397d0](https://github.com/ArchiDog1998/FakeName/commit/6a397d0237e5909d8f87102b930a3d9228b8740a))\r\n* net8. ([43fed37](https://github.com/ArchiDog1998/FakeName/commit/43fed377c35f5da9a41381d7a41a56cf03366aea))\r\n* time to replace. ([8546940](https://github.com/ArchiDog1998/FakeName/commit/8546940affe60eb757fe02a8cb277c36a698c29c))\r\n* trigger name. ([1e839a7](https://github.com/ArchiDog1998/FakeName/commit/1e839a70e2e73d65ff5ce78162c391afe27ad494))\r\n* update link. ([8841c42](https://github.com/ArchiDog1998/FakeName/commit/8841c42e93d75b039d4a796f2e5d066be1b8cb79))"
+      "Author": "ArchiTed",
+      "Name": "Rotation Solver",
+      "InternalName": "RotationSolver",
+      "AssemblyVersion": "4.2.5.0",
+      "Description": "Analyses combat information every frame and finds the best action.\n\nThis means almost all the information available in one frame in combat, including the status of all players in the party, the status of any hostile targets, skill cooldowns, the MP and HP of characters, the location of characters, casting status of the hostile target, combo, combat duration, player level, etc.\n\nThen, it will highlight the best action on the hot bar, or help you to click on it.\n\nIt is designed for GENERAL COMBAT, not for savage or ultimate. Use it carefully.",
+      "ApplicableVersion": "any",
+      "RepoUrl": "https://github.com/ArchiDog1998/RotationSolver",
+      "Tags": [
+        "combat",
+        "rotation"
+      ],
+      "CategoryTags": [
+        "jobs"
+      ],
+      "DalamudApiLevel": 9,
+      "LoadRequiredState": 0,
+      "LoadSync": false,
+      "CanUnloadAsync": false,
+      "LoadPriority": 0,
+      "IconUrl": "https://raw.githubusercontent.com/ArchiDog1998/RotationSolver/main/Images/Logo.png",
+      "Punchline": "Analyses combat information every frame and finds the best action.",
+      "AcceptsFeedback": true
     }
 ]
